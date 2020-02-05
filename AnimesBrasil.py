@@ -84,7 +84,24 @@ def GetInfo(id):
             ovas_img.append(z['capa'])
 
     else:
-        print('Erro na requisão')
+        return False
 
 
-GetInfo(49)
+def GetEp(id, page, validator):
+    url = 'https://remainder.myvideo.vip/api-new/eps/'+id+'/LEG/'+page+'?search=all'
+    eps = requests.get(url)
+    eps = json.loads(eps.content)
+    eps = eps['eps']
+
+    if(validator == True):
+        eps = eps['eps']
+        for x in eps:
+            print(x)
+        return 0
+    if(eps['paginas'] > 1):
+        pag = str(eps['paginas'])[:-3]
+        for y in range(1, int(pag)+1):
+            GetEp(str(id), str(y), True)
+
+
+GetEp(str(45), '1', False)
