@@ -15,21 +15,76 @@ def GetPage():
 def GetAllAnimes():
     page = str(GetPage())
     for x in range(1, int(page[:-2])+1):
+        print()
+        print()
+        print('*****************************')
+        print('Página '+str(x))
+        print('*****************************')
+        print()
+        print()
         ListAnimes = requests.get(
             'https://remainder.myvideo.vip/api-new/animes/'+str(x)+'?search=all')
         ListAnimes = json.loads(ListAnimes.content)
-        ListAnimes = ListAnimes['animes']['animes']
-        for y in range(len(ListAnimes)):
-            print('id: '+str(ListAnimes[y]['id']))
-            print('Nome: '+str(ListAnimes[y]['nome']))
-            print('Numero da temporada: '+str(ListAnimes[y]['numTemporada']))
-            print('Temporada: '+str(ListAnimes[y]['temporada']))
-            print('Imagem: '+str(ListAnimes[y]['capa']))
-            print('_________________________________________________')
+        try:
+            ListAnimes = ListAnimes['animes']['animes']
+            for y in range(len(ListAnimes)):
+                print('id: '+str(ListAnimes[y]['id']))
+                print('Nome: '+str(ListAnimes[y]['nome']))
+                print('Numero da temporada: ' +
+                      str(ListAnimes[y]['numTemporada']))
+                print('Temporada: '+str(ListAnimes[y]['temporada']))
+                print('Imagem: '+str(ListAnimes[y]['capa']))
+                print('_________________________________________________')
+                print()
+                print()
+        except:
+            print('___________________________')
+            print('Erro na página: '+str(x))
+            print('___________________________')
             print()
             print()
+            input()
 
-        input()
+
+def GetInfo(id):
+    url = 'https://remainder.myvideo.vip/api-new/anime/'+str(id)
+    info = requests.get(url)
+    if(info.status_code == 200):
+        info = json.loads(info.content)
+        info = info['anime']
+        dub = info['btn_dub']
+        leg = info['btn_leg']
+        img = info['capa']
+
+        ep_leg = info['ep_leg']
+        ep_dub = info['ep_dub']
+        desc = info['ds']
+        _id = info['id']
+        year = info['lancamento']
+        temp = info['numTemporada']
+        status = info['producao']
+        temp_name = info['temporada']
+        category = []
+        movie = []
+        id_movie = []
+        img_movie = []
+        ovas = []
+        ovas_id = []
+        ovas_img = []
+
+        for z in info['cat']:
+            category.append(z['nome'])
+        for z in info['filmes']:
+            movie.append(z['nome'])
+            id_movie.append(z['id'])
+            img_movie.append(z['capa'])
+        for z in info['ovas']:
+            ovas.append(z['nome'])
+            ovas_id.append(z['id'])
+            ovas_img.append(z['capa'])
+
+    else:
+        print('Erro na requisão')
 
 
-GetAllAnimes()
+GetInfo(49)
