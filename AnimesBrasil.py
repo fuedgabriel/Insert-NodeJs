@@ -1,5 +1,11 @@
 import requests
 import json
+import wget
+
+
+videos_title = []
+videos_url = []
+videos_mp4 = []
 
 
 def GetPage():
@@ -116,18 +122,40 @@ def GetEp(id, page, validator, language):
         pag = str(eps['paginas'])[:-3]
         for y in range(1, int(pag)+1):
             GetEp(str(id), str(y), True, language)
+        print('________________________________')
+        print(videos_url)
+        print('________________________________')
+        DownloadVideo(videos_url, videos_title, videos_mp4)
+        videos_mp4 = []
+        videos_title = []
+        videos_url = []
 
 
 def GetVideo(id_ep, quality):
+    # print('Video url'+str(videos_url))
     url = 'https://remainder.myvideo.vip/api-new/assistindov2/' + \
         str(quality)+'/'+str(id_ep)+'/PLAYER-2/c7e5767ead45d629'
     video = requests.get(url)
     video = json.loads(video.content)
     video = video['requestedMP4']
-    print('Download: '+video['download'])
-    print('MP4: '+video['mp4'])
-    print('Title: '+video['title'])
-    print('Url:'+video['url'])
+    videos_title.append(video['title'])
+    videos_url.append(video['download'])
+    videos_mp4.append(video['mp4'])
+    return videos_url
+    # print('Download: '+video['download'])
+    # print('MP4: '+video['mp4'])
+    # print('Title: '+video['title'])
+    # print('Url:'+video['url'])
+
+
+def DownloadVideo(url, title, mp4):
+    if('myvideo.vip' in url):
+        for x in url:
+            responsee = requests.head(x, allow_redirects=True)
+            wget.download(responsee.url)
+    else:
+        for x in url:
+            wget.download(url)
 
 
 GetEp(str(43), '1', False, 'LEG')
