@@ -82,10 +82,12 @@ def GetAllAnimes():
                 for y in range(len(ListAnimes)):
                     print('id: '+str(ListAnimes[y]['id']))
                     print('Nome: '+str(ListAnimes[y]['nome']))
-                    print('Numero da temporada: ' +
-                          str(ListAnimes[y]['numTemporada']))
+                    print('Numero da temporada: ' + str(ListAnimes[y]['numTemporada']))
                     print('Temporada: '+str(ListAnimes[y]['temporada']))
                     print('Imagem: '+str(ListAnimes[y]['capa']))
+                    print(str(ListAnimes[y]['id']))
+                    GetInfo(str(ListAnimes[y]['id']))
+                    input()
                     print('_________________________________________________')
                     print()
                     print()
