@@ -1,11 +1,45 @@
 import requests
 import json
 import wget
+import _thread as thread
 
 
-videos_title = []
-videos_url = []
-videos_mp4 = []
+videos_titleBG = []
+videos_urlBG = []
+videos_mp4BG = []
+
+videos_titleSD = []
+videos_urlSD = []
+videos_mp4SD = []
+
+videos_titleHD = []
+videos_urlHD = []
+videos_mp4HD = []
+
+
+def clear():
+    videos_mp4SD.clear
+    videos_titleSD.clear
+    videos_urlSD.clear
+
+    videos_mp4BG.clear
+    videos_titleBG.clear
+    videos_urlBG.clear
+
+    videos_mp4HD.clear
+    videos_titleHD.clear
+    videos_urlHD.clear
+
+
+def insert(title, episode, idAnime, url):
+    payload = {
+        "_id": str(idAnime),
+        "Title": str(title),
+        "Episodes": str(episode),
+        "URL": str(url),
+        "User": "Python"
+    }
+    requests.post('http://localhost:7844/api/animeErro', json=payload)
 
 
 def GetPage():
@@ -20,6 +54,7 @@ def GetPage():
 
 def GetAllAnimes():
     page = str(GetPage())
+    print(int(page[:-2])+1)
     for x in range(1, int(page[:-2])+1):
         print()
         print()
@@ -28,22 +63,34 @@ def GetAllAnimes():
         print('*****************************')
         print()
         print()
-        ListAnimes = requests.get(
-            'https://remainder.myvideo.vip/api-new/animes/'+str(x)+'?search=all')
-        ListAnimes = json.loads(ListAnimes.content)
         try:
-            ListAnimes = ListAnimes['animes']['animes']
-            for y in range(len(ListAnimes)):
-                print('id: '+str(ListAnimes[y]['id']))
-                print('Nome: '+str(ListAnimes[y]['nome']))
-                print('Numero da temporada: ' +
-                      str(ListAnimes[y]['numTemporada']))
-                print('Temporada: '+str(ListAnimes[y]['temporada']))
-                print('Imagem: '+str(ListAnimes[y]['capa']))
-                print('_________________________________________________')
-                print()
-                print()
+            url = 'https://remainder.myvideo.vip/api-new/animes/' + \
+                str(x)+'?search=all'
+            ListAnimes = requests.get(url)
+            ListAnimes = json.loads(ListAnimes.content)
+            if(x == 9):
+                print(ListAnimes)
+                input
+            if(ListAnimes == "{\"animes\":{}}"):
+                insert('página', str(x), str(x), url)
+                print('___________________________')
+                print('Erro na página: '+str(x))
+                print('___________________________')
+                input()
+            else:
+                ListAnimes = ListAnimes['animes']['animes']
+                for y in range(len(ListAnimes)):
+                    print('id: '+str(ListAnimes[y]['id']))
+                    print('Nome: '+str(ListAnimes[y]['nome']))
+                    print('Numero da temporada: ' +
+                          str(ListAnimes[y]['numTemporada']))
+                    print('Temporada: '+str(ListAnimes[y]['temporada']))
+                    print('Imagem: '+str(ListAnimes[y]['capa']))
+                    print('_________________________________________________')
+                    print()
+                    print()
         except:
+            insert('página', str(x), str(x), url)
             print('___________________________')
             print('Erro na página: '+str(x))
             print('___________________________')
@@ -94,9 +141,16 @@ def GetInfo(id):
         if(leg == True):
             GetEp(_id, '1', False, 'LEG')
             print('Episódio legendado acima')
-
     else:
         return False
+
+
+def GetEpOne(id, page, validator, language):
+    url = 'https://remainder.myvideo.vip/api-new/eps/' + \
+        str(id)+'/'+language+'/'+page+'?search=all'
+    eps = requests.get(url)
+    eps = json.loads(eps.content)
+    eps = eps['eps']
 
 
 def GetEp(id, page, validator, language):
@@ -111,41 +165,67 @@ def GetEp(id, page, validator, language):
         for x in eps:
             print(x)
             if(x['link_bg'] == True):
-                GetVideo(x['id'], 'BG')
+                thread.start_new_thread(GetVideoBG, (x['id'],))
             if(x['link_hd'] == True):
-                GetVideo(x['id'], 'HD')
+                thread.start_new_thread(GetVideoHD, (x['id'],))
             if(x['link_sd'] == True):
-                GetVideo(x['id'], 'SD')
+                thread.start_new_thread(GetVideoSD, (x['id'],))
             print('_____________________')
         return 0
-    if(eps['paginas'] > 1):
+
+    if(eps['paginas'] > 1.9):
         pag = str(eps['paginas'])[:-3]
         for y in range(1, int(pag)+1):
             GetEp(str(id), str(y), True, language)
-        print('________________________________')
-        print(videos_url)
-        print('________________________________')
-        DownloadVideo(videos_url, videos_title, videos_mp4)
-        videos_mp4 = []
-        videos_title = []
-        videos_url = []
+    else:
+        print('aaa')
+        pag = str(eps['paginas'])[:-3]
+        GetEp(str(id), '1', True, language)
+    clear()
+    print('________________________________')
+    print('BG, BG, BG')
+    input()
+    print('________________________________')
+    # DownloadVideo(videos_url, videos_title, videos_mp4)
 
 
-def GetVideo(id_ep, quality):
+def GetVideoBG(id_ep):
     # print('Video url'+str(videos_url))
-    url = 'https://remainder.myvideo.vip/api-new/assistindov2/' + \
-        str(quality)+'/'+str(id_ep)+'/PLAYER-2/c7e5767ead45d629'
+    url = 'https://remainder.myvideo.vip/api-new/assistindov2/BG/' + \
+        str(id_ep)+'/PLAYER-2/c7e5767ead45d629'
     video = requests.get(url)
     video = json.loads(video.content)
     video = video['requestedMP4']
-    videos_title.append(video['title'])
-    videos_url.append(video['download'])
-    videos_mp4.append(video['mp4'])
-    return videos_url
-    # print('Download: '+video['download'])
-    # print('MP4: '+video['mp4'])
-    # print('Title: '+video['title'])
-    # print('Url:'+video['url'])
+    videos_titleBG.append(video['title'])
+    videos_urlBG.append(video['download'])
+    videos_mp4BG.append(video['mp4'])
+    return videos_mp4BG
+
+
+def GetVideoSD(id_ep):
+    # print('Video url'+str(videos_url))
+    url = 'https://remainder.myvideo.vip/api-new/assistindov2/SD/' + \
+        str(id_ep)+'/PLAYER-2/c7e5767ead45d629'
+    video = requests.get(url)
+    video = json.loads(video.content)
+    video = video['requestedMP4']
+    videos_titleSD.append(video['title'])
+    videos_urlSD.append(video['download'])
+    videos_mp4SD.append(video['mp4'])
+    return videos_titleSD
+
+
+def GetVideoHD(id_ep):
+    # print('Video url'+str(videos_url))
+    url = 'https://remainder.myvideo.vip/api-new/assistindov2/HD/' + \
+        str(id_ep)+'/PLAYER-2/c7e5767ead45d629'
+    video = requests.get(url)
+    video = json.loads(video.content)
+    video = video['requestedMP4']
+    videos_titleHD.append(video['title'])
+    videos_urlHD.append(video['download'])
+    videos_mp4HD.append(video['mp4'])
+    return videos_titleHD
 
 
 def DownloadVideo(url, title, mp4):
@@ -158,4 +238,5 @@ def DownloadVideo(url, title, mp4):
             wget.download(url)
 
 
-GetEp(str(43), '1', False, 'LEG')
+# GetEp(str(12), '1', False, 'LEG')
+GetAllAnimes()
