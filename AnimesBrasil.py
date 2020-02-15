@@ -2,7 +2,7 @@ import requests
 import json
 import wget
 import _thread as thread
-
+import os
 
 videos_titleBG = []
 videos_urlBG = []
@@ -54,8 +54,8 @@ def GetPage():
 
 def GetAllAnimes():
     page = str(GetPage())
-    print(int(page[:-2])+1)
-    for x in range(1, int(page[:-2])+1):
+    print(int(page[:-3])+1)
+    for x in range(1, int(page[:-3])+1):
         print()
         print()
         print('*****************************')
@@ -68,29 +68,25 @@ def GetAllAnimes():
                 str(x)+'?search=all'
             ListAnimes = requests.get(url)
             ListAnimes = json.loads(ListAnimes.content)
-            if(x == 9):
-                print(ListAnimes)
-                input
             if(ListAnimes == "{\"animes\":{}}"):
                 insert('página', str(x), str(x), url)
                 print('___________________________')
                 print('Erro na página: '+str(x))
                 print('___________________________')
-                input()
             else:
                 ListAnimes = ListAnimes['animes']['animes']
                 for y in range(len(ListAnimes)):
                     print('id: '+str(ListAnimes[y]['id']))
                     print('Nome: '+str(ListAnimes[y]['nome']))
-                    print('Numero da temporada: ' + str(ListAnimes[y]['numTemporada']))
+                    print('Numero da temporada: ' +
+                          str(ListAnimes[y]['numTemporada']))
                     print('Temporada: '+str(ListAnimes[y]['temporada']))
                     print('Imagem: '+str(ListAnimes[y]['capa']))
-                    print(str(ListAnimes[y]['id']))
-                    GetInfo(str(ListAnimes[y]['id']))
-                    input()
                     print('_________________________________________________')
                     print()
                     print()
+                    os.system('mkdir '+str(ListAnimes[y]['id']))
+                    GetInfo(str(ListAnimes[y]['id']))
         except:
             insert('página', str(x), str(x), url)
             print('___________________________')
@@ -98,7 +94,6 @@ def GetAllAnimes():
             print('___________________________')
             print()
             print()
-            input()
 
 
 def GetInfo(id):
@@ -138,11 +133,22 @@ def GetInfo(id):
             ovas_id.append(z['id'])
             ovas_img.append(z['capa'])
         if(dub == True):
+            print()
+            print('____________________________________________')
+            print('Episódios dublado')
             GetEp(_id, '1', False, 'DUB')
-            print('Episódio dublado acima')
+            print('____________________________________________')
+            print()
+
         if(leg == True):
+            print()
+            print('____________________________________________')
+            print('Episódios legendado')
             GetEp(_id, '1', False, 'LEG')
-            print('Episódio legendado acima')
+            print('____________________________________________')
+            print()
+
+        input()
     else:
         return False
 
@@ -180,15 +186,13 @@ def GetEp(id, page, validator, language):
         for y in range(1, int(pag)+1):
             GetEp(str(id), str(y), True, language)
     else:
-        print('aaa')
         pag = str(eps['paginas'])[:-3]
         GetEp(str(id), '1', True, language)
+
+    DownloadVideo(videos_urlBG, videos_titleBG, videos_mp4BG, id, 'BG')
+    DownloadVideo(videos_urlSD, videos_titleSD, videos_mp4SD, id, 'SD')
+    DownloadVideo(videos_urlHD, videos_titleHD, videos_mp4HD, id, 'HD')
     clear()
-    print('________________________________')
-    print('BG, BG, BG')
-    input()
-    print('________________________________')
-    # DownloadVideo(videos_url, videos_title, videos_mp4)
 
 
 def GetVideoBG(id_ep):
@@ -230,14 +234,17 @@ def GetVideoHD(id_ep):
     return videos_titleHD
 
 
-def DownloadVideo(url, title, mp4):
-    if('myvideo.vip' in url):
-        for x in url:
-            responsee = requests.head(x, allow_redirects=True)
-            wget.download(responsee.url)
-    else:
-        for x in url:
-            wget.download(url)
+def DownloadVideo(url, title, mp4, _id, quality):
+
+    if(url == []):
+        return False
+    os.system('cd '+str(_id)+' && mkdir '+quality)
+    print(url)
+    input()
+    print('Iniciando download')
+    for x in url:
+        responsee = requests.head(x, allow_redirects=True)
+        wget.download(responsee.url)
 
 
 # GetEp(str(12), '1', False, 'LEG')
