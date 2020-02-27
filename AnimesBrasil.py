@@ -1,7 +1,6 @@
 import requests
 import json
 import wget
-import _thread as thread
 import threading
 
 import os
@@ -17,6 +16,10 @@ videos_mp4SD = []
 videos_titleHD = []
 videos_urlHD = []
 videos_mp4HD = []
+
+
+def Control():
+    print()
 
 
 def clear():
@@ -35,7 +38,17 @@ def clear():
 
 def insert(title, episode, idAnime, url):
     payload = {
-        "_id": str(idAnime),
+        "Title": str(title),
+        "Anime_id": str(idAnime),
+        "Episodes": str(episode),
+        "URL": str(url),
+        "User": "Python"
+    }
+    requests.post('http://localhost:7844/api/animeErro', json=payload)
+
+
+def insertNoID(title, episode, url):
+    payload = {
         "Title": str(title),
         "Episodes": str(episode),
         "URL": str(url),
@@ -58,6 +71,7 @@ def GetAllAnimes():
     page = str(GetPage())
     print(int(page[:-3])+1)
     for x in range(1, int(page[:-3])+1):
+
         print()
         print()
         print('*****************************')
@@ -71,7 +85,7 @@ def GetAllAnimes():
             ListAnimes = requests.get(url)
             ListAnimes = json.loads(ListAnimes.content)
             if(ListAnimes == "{\"animes\":{}}"):
-                insert('página', str(x), str(x), url)
+                insertNoID('pages', x, url)
                 print('___________________________')
                 print('Erro na página: '+str(x))
                 print('___________________________')
@@ -90,7 +104,7 @@ def GetAllAnimes():
                     os.system('mkdir '+str(ListAnimes[y]['id']))
                     GetInfo(str(ListAnimes[y]['id']))
         except:
-            insert('página', str(x), str(x), url)
+            insertNoID('página', x, url)
             print('___________________________')
             print('Erro na página: '+str(x))
             print('___________________________')
@@ -99,64 +113,67 @@ def GetAllAnimes():
 
 
 def GetInfo(id):
-    url = 'https://remainder.myvideo.vip/api-new/anime/'+str(id)
-    info = requests.get(url)
-    if(info.status_code == 200):
-        info = json.loads(info.content)
-        info = info['anime']
-        dub = info['btn_dub']
-        leg = info['btn_leg']
-        img = info['capa']
+    try:
+        url = 'https://remainder.myvideo.vip/api-new/anime/'+str(id)
+        info = requests.get(url)
+        if(info.status_code == 200):
+            info = json.loads(info.content)
+            info = info['anime']
+            dub = info['btn_dub']
+            leg = info['btn_leg']
+            img = info['capa']
+            ep_leg = info['ep_leg']
+            ep_dub = info['ep_dub']
+            desc = info['ds']
+            _id = info['id']
+            year = info['lancamento']
+            temp = info['numTemporada']
+            status = info['producao']
+            temp_name = info['temporada']
+            category = []
+            movie = []
+            id_movie = []
+            img_movie = []
+            ovas = []
+            ovas_id = []
+            ovas_img = []
 
-        ep_leg = info['ep_leg']
-        ep_dub = info['ep_dub']
-        desc = info['ds']
-        _id = info['id']
-        year = info['lancamento']
-        temp = info['numTemporada']
-        status = info['producao']
-        temp_name = info['temporada']
-        category = []
-        movie = []
-        id_movie = []
-        img_movie = []
-        ovas = []
-        ovas_id = []
-        ovas_img = []
+            for z in info['cat']:
+                category.append(z['nome'])
+            for z in info['filmes']:
+                movie.append(z['nome'])
+                id_movie.append(z['id'])
+                img_movie.append(z['capa'])
+            for z in info['ovas']:
+                ovas.append(z['nome'])
+                ovas_id.append(z['id'])
+                ovas_img.append(z['capa'])
+            if(dub == True):
+                print()
+                print('____________________________________________')
+                print('Episódios dublado')
+                GetEp(_id, '1', False, 'DUB')
+                print('____________________________________________')
+                print()
+                print()
+                print()
+                print()
 
-        for z in info['cat']:
-            category.append(z['nome'])
-        for z in info['filmes']:
-            movie.append(z['nome'])
-            id_movie.append(z['id'])
-            img_movie.append(z['capa'])
-        for z in info['ovas']:
-            ovas.append(z['nome'])
-            ovas_id.append(z['id'])
-            ovas_img.append(z['capa'])
-        if(dub == True):
-            print()
-            print('____________________________________________')
-            print('Episódios dublado')
-            GetEp(_id, '1', False, 'DUB')
-            print('____________________________________________')
-            print()
-            print()
-            print()
-            print()
-
-        if(leg == True):
-            print()
-            print('____________________________________________')
-            print('Episódios legendado')
-            GetEp(_id, '1', False, 'LEG')
-            print('____________________________________________')
-            print()
-            print()
-            print()
-        input()
-    else:
-        return False
+            if(leg == True):
+                print()
+                print('____________________________________________')
+                print('Episódios legendado')
+                GetEp(_id, '1', False, 'LEG')
+                print('____________________________________________')
+                print()
+                print()
+                print()
+                # input()
+        else:
+            insert('Anime', id, id, url)
+            return False
+    except:
+        insert('Anime', id, id, url)
 
 
 def GetEpOne(id, page, validator, language):
@@ -179,11 +196,14 @@ def GetEp(id, page, validator, language):
         for x in eps:
             print(x)
             if(x['link_bg'] == True):
-                thread.start_new_thread(GetVideoBG, (x['id'],))
+                tLINKbg = threading.Thread(target=GetVideoBG, args=(x['id'],))
+                tLINKbg.start()
             if(x['link_hd'] == True):
-                thread.start_new_thread(GetVideoHD, (x['id'],))
+                tLINKhd = threading.Thread(target=GetVideoHD, args=(x['id'],))
+                tLINKhd.start()
             if(x['link_sd'] == True):
-                thread.start_new_thread(GetVideoSD, (x['id'],))
+                tLINKsd = threading.Thread(target=GetVideoSD, args=(x['id'],))
+                tLINKsd.start()
             print('_____________________')
         return 0
 
@@ -196,26 +216,30 @@ def GetEp(id, page, validator, language):
         GetEp(str(id), '1', True, language)
 
     tBG = threading.Thread(target=DownloadVideo, args=(
-        videos_urlBG, videos_titleBG, videos_mp4BG, id, 'BG'))
+        videos_urlBG, videos_titleBG, videos_mp4BG, id, 'BG', language))
     tSD = threading.Thread(target=DownloadVideo, args=(
-        videos_urlSD, videos_titleSD, videos_mp4SD, id, 'SD'))
+        videos_urlSD, videos_titleSD, videos_mp4SD, id, 'SD', language))
     tHD = threading.Thread(target=DownloadVideo, args=(
-        videos_urlHD, videos_titleHD, videos_mp4HD, id, 'HD'))
+        videos_urlHD, videos_titleHD, videos_mp4HD, id, 'HD', language))
     tBG.start()
     tSD.start()
     tHD.start()
     while True:
-        if(tSD.isAlive() == False and tBG.isAlive() == False and tHD.isAlive() == False):
-            print('Download finalizado')
+        if(tSD.is_alive() == False and tBG.is_alive() == False and tHD.is_alive() == False):
+            print('\nDownload finalizado')
+        #     tBG._stop()
+        #     tSD._stop()
+        #     tHD._stop()
+        #    tLINKhd._stop()
+        #     tLINKsd._stop()
+        #     tLINKbg._stop()
             break
         else:
-            print('\nBG: '+str(tBG.isAlive()))
-            print('SD: '+str(tSD.isAlive()))
-            print('HD: '+str(tHD.isAlive()))
+            print('\nBG: '+str(tBG.is_alive()))
+            print('SD: '+str(tSD.is_alive()))
+            print('HD: '+str(tHD.is_alive()))
             print('Download em andamento')
-            time.sleep(10)
-
-    input()
+            time.sleep(3)
     clear()
 
 
@@ -258,21 +282,25 @@ def GetVideoHD(id_ep):
     return videos_titleHD
 
 
-def DownloadVideo(url, title, mp4, _id, quality):
+def DownloadVideo(url, title, mp4, _id, quality, language):
 
     if(url == []):
         return False
     os.system('cd '+str(_id)+' && mkdir '+quality)
     # print(url)
     print('Iniciando download')
+    zz = 0
     for x in url:
+        zz = zz+1
         print('URL: {'+str(x) + '}')
         try:
-            responsee = requests.head(x, allow_redirects=True)
-            wget.download(responsee.url)
+            print("Download concluido :"+str(x))
+            # responsee = requests.head(x, allow_redirects=True)
+            # wget.download(responsee.url)
         except:
-            insert('Episode', str(quality), str(_id), str(x))
+            insert('Episode '+quality+' '+language, zz, _id, x)
 
 
 # GetEp(str(12), '1', False, 'LEG')
-GetAllAnimes()
+# GetAllAnimes()
+Control()
