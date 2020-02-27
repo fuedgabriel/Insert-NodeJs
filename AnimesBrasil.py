@@ -2,8 +2,10 @@ import requests
 import json
 import wget
 import _thread as thread
-import os
+import threading
 
+import os
+import time
 videos_titleBG = []
 videos_urlBG = []
 videos_mp4BG = []
@@ -139,6 +141,9 @@ def GetInfo(id):
             GetEp(_id, '1', False, 'DUB')
             print('____________________________________________')
             print()
+            print()
+            print()
+            print()
 
         if(leg == True):
             print()
@@ -147,7 +152,8 @@ def GetInfo(id):
             GetEp(_id, '1', False, 'LEG')
             print('____________________________________________')
             print()
-
+            print()
+            print()
         input()
     else:
         return False
@@ -189,9 +195,27 @@ def GetEp(id, page, validator, language):
         pag = str(eps['paginas'])[:-3]
         GetEp(str(id), '1', True, language)
 
-    DownloadVideo(videos_urlBG, videos_titleBG, videos_mp4BG, id, 'BG')
-    DownloadVideo(videos_urlSD, videos_titleSD, videos_mp4SD, id, 'SD')
-    DownloadVideo(videos_urlHD, videos_titleHD, videos_mp4HD, id, 'HD')
+    tBG = threading.Thread(target=DownloadVideo, args=(
+        videos_urlBG, videos_titleBG, videos_mp4BG, id, 'BG'))
+    tSD = threading.Thread(target=DownloadVideo, args=(
+        videos_urlSD, videos_titleSD, videos_mp4SD, id, 'SD'))
+    tHD = threading.Thread(target=DownloadVideo, args=(
+        videos_urlHD, videos_titleHD, videos_mp4HD, id, 'HD'))
+    tBG.start()
+    tSD.start()
+    tHD.start()
+    while True:
+        if(tSD.isAlive() == False and tBG.isAlive() == False and tHD.isAlive() == False):
+            print('Download finalizado')
+            break
+        else:
+            print('\nBG: '+str(tBG.isAlive()))
+            print('SD: '+str(tSD.isAlive()))
+            print('HD: '+str(tHD.isAlive()))
+            print('Download em andamento')
+            time.sleep(10)
+
+    input()
     clear()
 
 
@@ -239,12 +263,15 @@ def DownloadVideo(url, title, mp4, _id, quality):
     if(url == []):
         return False
     os.system('cd '+str(_id)+' && mkdir '+quality)
-    print(url)
-    input()
+    # print(url)
     print('Iniciando download')
     for x in url:
-        responsee = requests.head(x, allow_redirects=True)
-        wget.download(responsee.url)
+        print('URL: {'+str(x) + '}')
+        try:
+            responsee = requests.head(x, allow_redirects=True)
+            wget.download(responsee.url)
+        except:
+            insert('Episode', str(quality), str(_id), str(x))
 
 
 # GetEp(str(12), '1', False, 'LEG')
