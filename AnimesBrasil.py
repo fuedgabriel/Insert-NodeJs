@@ -18,8 +18,13 @@ videos_urlHD = []
 videos_mp4HD = []
 
 
-def Control():
-    print()
+def Control(Anime, Anime_id, EpisodeLEG, EpisodeDUB, EpisodesLEG, EpisodesDUB, Quality, Category):
+    print("***************-----PAINEL DE CONTROLE***************-----")
+    print("Nome: "+str(Anime) + "           Id: "+str(Anime_id))
+    print("Legendado: "+str(EpisodeLEG)+" de "+str(EpisodesLEG))
+    print("Dublado: "+str(EpisodeDUB)+" de "+str(EpisodesDUB))
+    print("Categorias: " +
+          str(Category).replace('[', '').replace(']', '').replace('\'', ''))
 
 
 def clear():
@@ -102,7 +107,7 @@ def GetAllAnimes():
                     print()
                     print()
                     os.system('mkdir '+str(ListAnimes[y]['id']))
-                    GetInfo(str(ListAnimes[y]['id']))
+                    GetInfo(str(ListAnimes[y]['id']), ListAnimes[y]['nome'])
         except:
             insertNoID('página', x, url)
             print('___________________________')
@@ -112,7 +117,7 @@ def GetAllAnimes():
             print()
 
 
-def GetInfo(id):
+def GetInfo(id, name):
     try:
         url = 'https://remainder.myvideo.vip/api-new/anime/'+str(id)
         info = requests.get(url)
@@ -148,6 +153,8 @@ def GetInfo(id):
                 ovas.append(z['nome'])
                 ovas_id.append(z['id'])
                 ovas_img.append(z['capa'])
+            Control(name, id, ep_leg, ep_dub, 0, 0, 'SD', category)
+            input()
             if(dub == True):
                 print()
                 print('____________________________________________')
@@ -302,5 +309,4 @@ def DownloadVideo(url, title, mp4, _id, quality, language):
 
 
 # GetEp(str(12), '1', False, 'LEG')
-# GetAllAnimes()
-Control()
+GetAllAnimes()
