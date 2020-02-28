@@ -2,9 +2,10 @@ import requests
 import json
 import wget
 import threading
-
 import os
 import time
+import requestImage
+
 videos_titleBG = []
 videos_urlBG = []
 videos_mp4BG = []
@@ -31,8 +32,9 @@ Anime_id = ["Null"]
 DownloadBG = ["Null"]
 DownloadSD = ["Null"]
 DownloadHD = ["Null"]
-ErrosPage = ["Null"]
+ErrosPage = ["0"]
 PageLocal = ["Null"]
+Banner = ["Null"]
 
 
 def Control():
@@ -47,13 +49,14 @@ def Control():
         print("Dublado: "+str(EpisodesDUB[0])+" de "+str(EpisodeDUB[0]))
         print("Qualidades --> BG: " +
               DownloadBG[0]+"   SD: "+DownloadSD[0]+"   HD: "+DownloadHD[0])
+        print("Banner: "+Banner[0]+"")
         print("Ovas: " +
               str(Ovass).replace('[', '').replace(']', '').replace('\'', ''))
         print("Filmes: " +
               str(Movies).replace('[', '').replace(']', '').replace('\'', ''))
         print("Categorias: " +
               str(Category).replace('[', '').replace(']', '').replace('\'', ''))
-        print("Erros páginas: \033[31m" +
+        print("Páginas com erro: \033[31m" +
               str(ErrosPage).replace('[', '').replace(']', '').replace('\'', '') + "\033[0;0m")
 
 
@@ -156,6 +159,13 @@ def GetInfo(id, name):
         url = 'https://remainder.myvideo.vip/api-new/anime/'+str(id)
         info = requests.get(url)
         if(info.status_code == 200):
+            bannner = requestImage.GETimage(name)
+            Banner.clear()
+            if(bannner == False):
+                Banner.append("\033[31mErro na requisição\033[0;0m")
+            else:
+                Banner.append("\033[32mSucesso na requisição\033[32;0m")
+
             info = json.loads(info.content)
             info = info['anime']
             dub = info['btn_dub']
