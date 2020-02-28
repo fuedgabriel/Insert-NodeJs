@@ -60,6 +60,14 @@ def Control():
               str(ErrosPage).replace('[', '').replace(']', '').replace('\'', '') + "\033[0;0m")
 
 
+def uploadTheVid():
+    pass
+
+
+def uploadGoogle():
+    pass
+
+
 def clear():
     videos_mp4SD.clear
     videos_titleSD.clear
