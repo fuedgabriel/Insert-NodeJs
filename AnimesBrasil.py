@@ -38,10 +38,11 @@ PageLocal = ["Null"]
 def Control():
     while True:
         time.sleep(2)
+        os.system('cls')
         print(
-            "***************-----PAINEL DE CONTROLE***************----- Página: "+str(PageLocal[0]))
-        print("Nome: "+str(Anime[0])+"           Id: " +
-              str(Anime_id[0])+"   Ano: \033[31m" + str(Year[0])+'\033[0;0m')
+            "\033[31m***************-----\033[0;0m\033[33mPAINEL DE CONTROLE\033[31m-----***************\033[0;0m \033[32mPágina: \033[4;33;40m" + str(PageLocal[0])+"\033[41;0m \n\n")
+        print("Nome: \033[35m"+str(Anime[0])+"\033[35;0m           Id: \033[36m" +
+              str(Anime_id[0])+"\033[36;0m   Ano: " + str(Year[0]))
         print("Legendado: "+str(EpisodesLEG[0])+" de "+str(EpisodeLEG[0]))
         print("Dublado: "+str(EpisodesDUB[0])+" de "+str(EpisodeDUB[0]))
         print("Qualidades --> BG: " +
@@ -52,8 +53,8 @@ def Control():
               str(Movies).replace('[', '').replace(']', '').replace('\'', ''))
         print("Categorias: " +
               str(Category).replace('[', '').replace(']', '').replace('\'', ''))
-        print("Erros páginas: " +
-              str(ErrosPage).replace('[', '').replace(']', '').replace('\'', ''))
+        print("Erros páginas: \033[31m" +
+              str(ErrosPage).replace('[', '').replace(']', '').replace('\'', '') + "\033[0;0m")
 
 
 def clear():
@@ -288,9 +289,9 @@ def GetEp(id, page, validator, language):
             DownloadBG.clear()
             DownloadSD.clear()
             DownloadHD.clear()
-            DownloadBG.append("Finalizado")
-            DownloadSD.append("Finalizado")
-            DownloadHD.append("Finalizado")
+            DownloadBG.append(" \033[32m Finalizado \033[32;0m")
+            DownloadSD.append(" \033[32m Finalizado \033[32;0m")
+            DownloadHD.append(" \033[32m Finalizado \033[32;0m")
             # print('\nDownload finalizado')
             break
         else:
@@ -300,24 +301,24 @@ def GetEp(id, page, validator, language):
             # print('Download em andamento')
             if(tBG.is_alive() == True):
                 DownloadBG.clear()
-                DownloadBG.append("Em andamento")
+                DownloadBG.append("\033[34mEm andamento \033[34;0m")
             else:
                 DownloadBG.clear()
-                DownloadBG.append("Finalizado")
+                DownloadBG.append(" \033[32m Finalizado \033[32;0m")
 
             if(tSD.is_alive() == True):
                 DownloadSD.clear()
-                DownloadSD.append("Em andamento")
+                DownloadSD.append("\033[34mEm andamento \033[34;0m")
             else:
                 DownloadSD.clear()
-                DownloadSD.append("Finalizado")
+                DownloadSD.append(" \033[32m Finalizado \033[32;0m")
 
             if(tHD.is_alive() == True):
                 DownloadHD.clear()
-                DownloadHD.append("Em andamento")
+                DownloadHD.append("\033[34mEm andamento \033[34;0m")
             else:
                 DownloadHD.clear()
-                DownloadHD.append("Finalizado")
+                DownloadHD.append(" \033[32m Finalizado \033[32;0m")
 
             time.sleep(3)
     clear()
