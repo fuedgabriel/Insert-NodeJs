@@ -60,12 +60,10 @@ def Control():
               str(ErrosPage).replace('[', '').replace(']', '').replace('\'', '') + "\033[0;0m")
 
 
-def uploadTheVid():
-    pass
-
-
-def uploadGoogle():
-    pass
+def GoogleStorage():
+    pub = "gsutil acl ch -u AllUsers:R gs://my-awesome-bucket/kitten.png"
+    upload = "gsutil cp http://svr1---s551-xjgk1ahg-cdn.gvideo.g-storage.network/animes/b-4/animes/naruto-shippunden/legendado/hd/326.mp4?rm=ZOYWkVSQeeMkI1f9vLY2QA&rf=1583002037 gs://animese0storage"
+    uploadFolder = "gsutil cp -r 1484 gs://animese0storage/Animes/animes"
 
 
 def clear():
@@ -385,6 +383,7 @@ def DownloadVideo(url, title, mp4, _id, quality, language):
     if(url == []):
         return False
     os.system('cd '+str(_id)+' && mkdir '+quality)
+    directory = str(_id)+'/'+quality+'/'
     # print(url)
     # print('Iniciando download')
     zz = 0
@@ -399,10 +398,9 @@ def DownloadVideo(url, title, mp4, _id, quality, language):
 
         # print('URL: {'+str(x) + '}')
         try:
-            time.sleep(3)
             # print("Download concluido :"+str(x))
-            # responsee = requests.head(x, allow_redirects=True)
-            # wget.download(responsee.url)
+            responsee = requests.head(x, allow_redirects=True)
+            wget.download(responsee.url, out=directory)
         except:
             insert('Episode '+quality+' '+language, zz, _id, x)
 
