@@ -5,6 +5,8 @@ import threading
 import os
 import time
 import requestImage
+import speedtest
+
 
 videos_titleBG = []
 videos_urlBG = []
@@ -36,14 +38,39 @@ ErrosPage = ["0"]
 PageLocal = ["Null"]
 Banner = ["Null"]
 
+Download = [0]
+Upload = [0]
+Ping = [0]
+
+
+def test():
+    s = speedtest.Speedtest()
+    s.get_servers()
+    s.get_best_server()
+    s.download()
+    s.upload()
+    res = s.results.dict()
+    Download.clear()
+    Download.append(res["download"])
+    Upload.clear()
+    Upload.append(res["upload"])
+    Ping.clear()
+    Ping.append(res["ping"])
+    time.sleep(600)
+
 
 def Control():
+    tSpeed = threading.Thread(target=test, args=())
+    tSpeed.start()
+
     while True:
         time.sleep(2)
         os.system('cls')
         print(
-            "\033[31m***************-----\033[0;0m\033[33mPAINEL DE CONTROLE\033[31m-----***************\033[0;0m \033[32mPágina: \033[4;33;40m" + str(PageLocal[0])+"\033[41;0m \n\n")
-        print("Nome: \033[35m"+str(Anime[0])+"\033[35;0m           Id: \033[36m" +
+            "\033[31m***************-----\033[0;0m\033[33mPAINEL DE CONTROLE\033[31m-----***************\033[0;0m \033[32mPágina: \033[4;33;40m" + str(PageLocal[0])+"\033[41;0m")
+        print("                                 \033[33m Download: \033[31m" +
+              str(Download[0]/1000)[0:2]+" \033[33m Upload: \033[31m"+str(Upload[0]/1000)[0:2]+" \033[33m  Ping: \033[31m"+str(Ping[0])[0:1])
+        print("\nNome: \033[35m"+str(Anime[0])+"\033[35;0m           Id: \033[36m" +
               str(Anime_id[0])+"\033[36;0m   Ano: " + str(Year[0]))
         print("Legendado: "+str(EpisodesLEG[0])+" de "+str(EpisodeLEG[0]))
         print("Dublado: "+str(EpisodesDUB[0])+" de "+str(EpisodeDUB[0]))
@@ -224,6 +251,7 @@ def GetInfo(id, name):
             EpisodeDUB.append(ep_dub)
             Year.append(year)
             Category.append(category)
+            time.sleep(1000000)
             if(dub == True):
                 # print()
                 # print('____________________________________________')
