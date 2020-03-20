@@ -251,12 +251,11 @@ def GetInfo(id, name):
             EpisodeDUB.append(ep_dub)
             Year.append(year)
             Category.append(category)
-            time.sleep(1000000)
             if(dub == True):
                 # print()
                 # print('____________________________________________')
                 # print('Episódios dublado')
-                GetEp(_id, '1', False, 'DUB')
+                GetEp(_id, '1', False, 'DUB', name)
                 # print('____________________________________________')
                 # print()
                 # print()
@@ -267,7 +266,7 @@ def GetInfo(id, name):
                 # print()
                 # print('____________________________________________')
                 # print('Episódios legendado')
-                GetEp(_id, '1', False, 'LEG')
+                GetEp(_id, '1', False, 'LEG', name)
                 # print('____________________________________________')
                 # print()
                 # print()
@@ -288,7 +287,7 @@ def GetEpOne(id, page, validator, language):
     eps = eps['eps']
 
 
-def GetEp(id, page, validator, language):
+def GetEp(id, page, validator, language, name):
     url = 'https://remainder.myvideo.vip/api-new/eps/' + \
         str(id)+'/'+language+'/'+page+'?search=all'
     eps = requests.get(url)
@@ -299,32 +298,37 @@ def GetEp(id, page, validator, language):
         eps = eps['eps']
         for x in eps:
             # print(x)
-            if(x['link_bg'] == True):
-                tLINKbg = threading.Thread(target=GetVideoBG, args=(x['id'],))
-                tLINKbg.start()
+            HD = False
+            SD = False
             if(x['link_hd'] == True):
                 tLINKhd = threading.Thread(target=GetVideoHD, args=(x['id'],))
                 tLINKhd.start()
-            if(x['link_sd'] == True):
+                HD = True
+            if(x['link_sd'] == True and HD != True):
                 tLINKsd = threading.Thread(target=GetVideoSD, args=(x['id'],))
                 tLINKsd.start()
+                SD = True
+            if(x['link_bg'] == True and SD != True):
+                tLINKbg = threading.Thread(target=GetVideoBG, args=(x['id'],))
+                tLINKbg.start()
+
             # print('_____________________')
         return 0
 
     if(eps['paginas'] > 1.9):
         pag = str(eps['paginas'])[:-3]
         for y in range(1, int(pag)+1):
-            GetEp(str(id), str(y), True, language)
+            GetEp(str(id), str(y), True, language, name)
     else:
         pag = str(eps['paginas'])[:-3]
-        GetEp(str(id), '1', True, language)
+        GetEp(str(id), '1', True, language, name)
 
     tBG = threading.Thread(target=DownloadVideo, args=(
-        videos_urlBG, videos_titleBG, videos_mp4BG, id, 'BG', language))
+        videos_urlBG, videos_titleBG, videos_mp4BG, id, 'BG', language, name))
     tSD = threading.Thread(target=DownloadVideo, args=(
-        videos_urlSD, videos_titleSD, videos_mp4SD, id, 'SD', language))
+        videos_urlSD, videos_titleSD, videos_mp4SD, id, 'SD', language, name))
     tHD = threading.Thread(target=DownloadVideo, args=(
-        videos_urlHD, videos_titleHD, videos_mp4HD, id, 'HD', language))
+        videos_urlHD, videos_titleHD, videos_mp4HD, id, 'HD', language, name))
     tBG.start()
     tSD.start()
     tHD.start()
@@ -407,16 +411,22 @@ def GetVideoHD(id_ep):
     return videos_titleHD
 
 
-def DownloadVideo(url, title, mp4, _id, quality, language):
+def DownloadVideo(url, title, mp4, _id, quality, language, name):
     if(url == []):
         return False
     os.system('cd '+str(_id)+' && mkdir '+quality)
+    os.system('cd '+str(_id)+' && echo "nome":"'+str(name) +
+              '", "episodes":"'+str(title)+'">nome.json')
+
     directory = str(_id)+'/'+quality+'/'
     # print(url)
     # print('Iniciando download')
     zz = 0
     for x in url:
         zz = zz+1
+        if(quality == 'BG'):
+            directory = str(_id)+'/'+quality+'/'
+            directory = directory+str(zz)+'.mp4'
         if(language == 'LEG'):
             EpisodesLEG.clear()
             EpisodesLEG.append(zz)
